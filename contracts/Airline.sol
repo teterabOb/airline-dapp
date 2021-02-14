@@ -26,7 +26,7 @@ contract Airline {
     constructor() public{
         owner = msg.sender;
         flights.push(Flight('Tokyo', 4 ether));
-        flights.push(Flight('Germany', 1 ether));
+        flights.push(Flight('Germany', 3 ether));
         flights.push(Flight('Santiago', 3 ether));
     }
 

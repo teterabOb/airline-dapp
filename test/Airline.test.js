@@ -1,3 +1,5 @@
+const { default: Web3 } = require("web3");
+
 const Airline = artifacts.require('Airline');
 
 let instance;
@@ -35,5 +37,38 @@ contract('Airline', (accounts) => {
         }
         catch (e) { return; }
         assert.fail();
+    });
+
+    it('it should get the real balance of the contract', async() => {
+
+        let flight = await instance.flights(0);
+        let price = flight[1];
+
+        let flight2 = await instance.flights(1);
+        let price2 = flight2[1]; 
+
+        await instance.buyFlight(0, { from: accounts[0], value: price });
+        await instance.buyFlight(1, { from: accounts[0], value: price2 });
+
+        let newAirlineBalance = await instance.getAirlineBalance();
+
+        assert.equal(newAirlineBalance.toNumber(), price.toNumber() + price2.toNumber());
+    });
+
+    it('should allow customers to redeem loyalty points', async() => {
+        let flight = await instance.flights(1);
+        let price = flight[1];
+
+        await instance.buyFlight(1, {from: accounts[0], value: price });
+
+        let balance = await Web3.eth.getBalance(accounts[0]);
+        await instance.redeemLoyaltyPoints({ from: accounts[0] });
+        let finalBalance = await Web3.eth.getBalance(accounts[0]);
+
+        let customer = await instance.customers(accounts[0]);
+        let loyaltyPoints = customer[0];
+
+        assert(loyaltyPoints, 0);
+        assert(finalBalance > balance);
     });
 });
