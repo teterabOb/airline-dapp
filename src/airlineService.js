@@ -35,6 +35,15 @@ export class AirlineService{
         return (await this.contract.totalFlights()).toNumber();
     }
 
+    getRefundableEther(from){
+        return this.contract.getRefundableEther({from});
+    }
+
+    redeemLoyaltyPoints(from){
+        return this.contract.redeemLoyaltyPoints({from});
+    }
+
+
     mapFlights(flights){
         return flights.map(flight => {
             return{

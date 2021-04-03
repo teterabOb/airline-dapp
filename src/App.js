@@ -30,19 +30,16 @@ export class App extends Component {
         this.airline = await AirlineContract(this.web3.currentProvider);
         this.airlineService = new AirlineService(this.airline);
 
-        //console.log(this.web3.version);
-        //console.log(this.airline.buyFlight);
-
         var account = (await this.web3.eth.getAccounts())[0];
-        //console.log(account);
 
-        this.setState({
-            
-        account: account.toLowerCase()
-        }, () => {
-            this.load();
-            
-        });
+       
+       this.web3.currentProvider.on('accountsChanged', (accounts) => {
+           this.setState({
+               account: accounts[0]
+           }, () => {
+               this.load();
+           })
+       });       
     }
 
     async getBalance(){
@@ -60,6 +57,17 @@ export class App extends Component {
         });
     }
 
+    async getRefundableEther(){
+        let refundableEther = this.toEther(await this.airlineService.getRefundableEther(this.state.account))
+        this.setState({
+            refundableEther
+        });
+    }
+
+    async refundLoyaltyPoints(){
+        await this.airlineService.redeemLoyaltyPoints(this.state.account);
+    }
+
     async getCustomerFlights(){
         let customerFlights = await this.airlineService.getCustomerFlights(this.state.account);
         this.setState({
@@ -69,18 +77,13 @@ export class App extends Component {
 
     async buyFlight(flightIndex, flight){
         await this.airlineService.buyFlight(flightIndex, this.state.account, flight.price)
-
-
-        //console.log(flightIndex)
-        //console.log(flight.name)
     }
 
-    
-    async load(){
-        //console.log("load") 
+    async load(){        
         this.getBalance();
         this.getFlights();
         this.getCustomerFlights();
+        this.getRefundableEther();
     }
 
     render() {
@@ -99,7 +102,9 @@ export class App extends Component {
                 </div>
                 <div className="col-sm">
                     <Panel title="Loyalty points - refundable ether">
-                    <p>{this.state.nombre}</p>
+                    <p>{this.state.refundableEther} eth</p>
+                    <button className="btn btn-sm bg-success text-white"
+                    onClick={this.refundLoyaltyPoints.bind(this)}> Refund</button>
                     </Panel>
                 </div>
             </div>
