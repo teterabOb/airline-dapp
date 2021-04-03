@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 contract Airline {
     address public owner;
@@ -21,7 +21,7 @@ contract Airline {
     mapping(address => Flight[]) public customerFlights;
     mapping(address => uint) public customerTotalFlights;
 
-    event FlightPurchased(address indexed customer, uint price);
+    event FlightPurchased(address indexed customer, uint price, string flight);
 
     constructor() public{
         owner = msg.sender;
@@ -40,7 +40,7 @@ contract Airline {
         customerFlights[msg.sender].push(flight);
         customerTotalFlights[msg.sender] ++;
 
-        FlightPurchased(msg.sender, flight.price);
+        FlightPurchased(msg.sender, flight.price, flight.name);
     }
 
     function totalFlights() public view returns (uint){
