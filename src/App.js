@@ -30,20 +30,33 @@ export class App extends Component {
         this.airline = await AirlineContract(this.web3.currentProvider);
         this.airlineService = new AirlineService(this.airline);
 
-        var account = (await this.web3.eth.getAccounts())[0];
+        //var account = (await this.web3.eth.getAccounts())[0];
+
+
 
        
        this.web3.currentProvider.on('accountsChanged', (accounts) => {
            this.setState({
                account: accounts[0]
+               
            }, () => {
                this.load();
            })
-       });       
+       });   
+       
+       let flightPurchased = this.airline.FlightPurchased();
+       flightPurchased.watch(function(err, result){
+           const {customer, price, flight} = result.args;
+
+           
+           console.log(`You purchased a flight to ${flight}`) 
+           console.log(customer)
+           console.log(this.state.account)
+
+       }.bind(this));
     }
 
     async getBalance(){
-        console.log("get balance")
         let weiBalance = await this.web3.eth.getBalance(this.state.account);
         this.setState({
             balance: this.toEther(weiBalance)
