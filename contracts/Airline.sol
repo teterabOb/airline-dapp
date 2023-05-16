@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.8.0;
 
 contract Airline {
     address public owner;
@@ -23,7 +23,7 @@ contract Airline {
 
     event FlightPurchased(address indexed customer, uint price, string flight);
 
-    constructor() public{
+    constructor() {
         owner = msg.sender;
         flights.push(Flight('Tokyo', 4 ether));
         flights.push(Flight('Germany', 3 ether));
@@ -31,7 +31,7 @@ contract Airline {
     }
 
     function buyFlight(uint flightIndex) public payable{
-        Flight flight = flights[flightIndex];
+        Flight memory flight = flights[flightIndex];
         require(msg.value == flight.price);
 
         Customer storage customer = customers[msg.sender];
@@ -40,7 +40,7 @@ contract Airline {
         customerFlights[msg.sender].push(flight);
         customerTotalFlights[msg.sender] ++;
 
-        FlightPurchased(msg.sender, flight.price, flight.name);
+        emit FlightPurchased(msg.sender, flight.price, flight.name);
     }
 
     function totalFlights() public view returns (uint){
@@ -50,7 +50,7 @@ contract Airline {
     function redeemLoyaltyPoints() public{
         Customer storage customer = customers[msg.sender];
         uint etherToRefund = etherPerPoint * customer.loyaltyPoints;
-        msg.sender.transfer(etherToRefund);
+        payable(msg.sender).transfer(etherToRefund);
         customer.loyaltyPoints = 0;
     }
 
@@ -60,7 +60,7 @@ contract Airline {
 
     function getAirlineBalance() public view returns (uint){
         //al ocupar this instancio la misma direccion del contrato
-        address airlineAddress = this;
+        address airlineAddress = address(this);
         return airlineAddress.balance;
     }
 
@@ -68,6 +68,4 @@ contract Airline {
         require(msg.sender == owner);
         _;
     }
-
-
 }
